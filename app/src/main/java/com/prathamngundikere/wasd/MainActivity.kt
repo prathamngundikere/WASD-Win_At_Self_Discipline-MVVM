@@ -22,7 +22,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.prathamngundikere.wasd.data.repository.impl.ConnectivityObserverImpl
+import com.prathamngundikere.wasd.data.repository.impl.FirebaseAuthManager
+import com.prathamngundikere.wasd.ui.SignInScreen
 import com.prathamngundikere.wasd.ui.theme.WASDTheme
+import com.prathamngundikere.wasd.ui.viewModel.AuthViewModel
 import com.prathamngundikere.wasd.ui.viewModel.ConnectivityViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -39,6 +42,12 @@ class MainActivity : ComponentActivity() {
                         connectivityObserver = ConnectivityObserverImpl(
                             context = applicationContext
                         )
+                    )
+                }
+
+                val authViewModel = viewModel<AuthViewModel> {
+                    AuthViewModel(
+                        authManager = FirebaseAuthManager()
                     )
                 }
 
@@ -82,7 +91,9 @@ class MainActivity : ComponentActivity() {
                             .padding(innerPadding),
                         contentAlignment = Alignment.Center
                     ) {
-                        Greeting("World")
+                        SignInScreen(
+                            viewModel = authViewModel
+                        )
                     }
                 }
             }
