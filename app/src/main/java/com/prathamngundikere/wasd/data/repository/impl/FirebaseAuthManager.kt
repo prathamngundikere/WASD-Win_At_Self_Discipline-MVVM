@@ -5,12 +5,16 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseUser
+import com.prathamngundikere.wasd.data.model.UserData
 import com.prathamngundikere.wasd.data.repository.AuthManager
+import com.prathamngundikere.wasd.data.repository.UserDataRepository
 import com.prathamngundikere.wasd.domain.AuthError
 import com.prathamngundikere.wasd.domain.Result
 import kotlinx.coroutines.tasks.await
 
-class FirebaseAuthManager: AuthManager {
+class FirebaseAuthManager(
+    val userDataRepository: UserDataRepository
+): AuthManager {
 
     private val auth: FirebaseAuth by lazy {
         FirebaseAuth.getInstance()
@@ -23,6 +27,18 @@ class FirebaseAuthManager: AuthManager {
         return try {
             auth.createUserWithEmailAndPassword(email, password).await()
             val user = auth.currentUser
+            if (user != null) {
+                userDataRepository.saveUserData(
+                    UserData(
+                        uid = user.uid,
+                        username = user.displayName,
+                        profilePictureUrl = user.photoUrl?.toString(),
+                        email = user.email ?: ""
+                    )
+                )
+                userDataRepository.setLoggedIn(true)
+                Log.d("AuthManager", "createAccountWithEmailAndPassword: $user")
+            }
             Log.d("AuthManager", "createAccountWithEmailAndPassword: $user")
             if (user != null)
                 Result.Success(user)
@@ -41,6 +57,18 @@ class FirebaseAuthManager: AuthManager {
         return try {
             auth.signInWithEmailAndPassword(email, password).await()
             val user = auth.currentUser
+            if (user != null) {
+                userDataRepository.saveUserData(
+                    UserData(
+                        uid = user.uid,
+                        username = user.displayName,
+                        profilePictureUrl = user.photoUrl?.toString(),
+                        email = user.email ?: ""
+                    )
+                )
+                userDataRepository.setLoggedIn(true)
+                Log.d("AuthManager", "signInWithEmailAndPassword: $user")
+            }
             Log.d("AuthManager", "signInWithEmailAndPassword: $user")
             if (user != null)
                 Result.Success(user)
@@ -58,6 +86,7 @@ class FirebaseAuthManager: AuthManager {
             user?.sendEmailVerification()?.await()
             Result.Success(Unit)
         } catch (e: Exception) {
+            Log.e("AuthManager", "sendEmailVerification: ${e.message}")
             Result.Error(AuthError.UnknownError)
         }
     }
@@ -66,6 +95,17 @@ class FirebaseAuthManager: AuthManager {
         return try {
             val user = auth.currentUser
             user?.reload()?.await()
+            if (user != null) {
+                userDataRepository.saveUserData(
+                    UserData(
+                        uid = user.uid,
+                        username = user.displayName,
+                        profilePictureUrl = user.photoUrl?.toString(),
+                        email = user.email ?: ""
+                    )
+                )
+                userDataRepository.setLoggedIn(true)
+            }
             if (user != null)
                 Result.Success(user)
             else
@@ -76,6 +116,8 @@ class FirebaseAuthManager: AuthManager {
     }
 
     override suspend fun signOut() {
+        userDataRepository.deleteUserData()
+        userDataRepository.setLoggedIn(false)
         auth.signOut()
     }
 

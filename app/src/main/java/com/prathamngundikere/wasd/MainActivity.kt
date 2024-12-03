@@ -21,12 +21,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.prathamngundikere.wasd.data.repository.impl.ConnectivityObserverImpl
 import com.prathamngundikere.wasd.data.repository.impl.FirebaseAuthManager
+import com.prathamngundikere.wasd.data.repository.impl.UserDataRepositoryImpl
+import com.prathamngundikere.wasd.ui.ProfileScreen
 import com.prathamngundikere.wasd.ui.SignInScreen
+import com.prathamngundikere.wasd.ui.SplashScreen
 import com.prathamngundikere.wasd.ui.theme.WASDTheme
 import com.prathamngundikere.wasd.ui.viewModel.AuthViewModel
 import com.prathamngundikere.wasd.ui.viewModel.ConnectivityViewModel
+import com.prathamngundikere.wasd.ui.viewModel.ProfileViewModel
+import com.prathamngundikere.wasd.ui.viewModel.SplashScreenViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -34,9 +42,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val googleAuthClient = GoogleAuthClient(applicationContext)
         setContent {
             WASDTheme {
-
+                val navController = rememberNavController()
                 val viewModel = viewModel<ConnectivityViewModel> {
                     ConnectivityViewModel(
                         connectivityObserver = ConnectivityObserverImpl(
@@ -47,7 +56,31 @@ class MainActivity : ComponentActivity() {
 
                 val authViewModel = viewModel<AuthViewModel> {
                     AuthViewModel(
-                        authManager = FirebaseAuthManager()
+                        authManager = FirebaseAuthManager(
+                            userDataRepository = UserDataRepositoryImpl(
+                                context = applicationContext
+                            )
+                        )
+                    )
+                }
+                val profileViewModel = viewModel<ProfileViewModel> {
+                    ProfileViewModel(
+                        userDataRepository = UserDataRepositoryImpl(
+                            context = applicationContext
+                        )
+                    )
+                }
+                val splashScreenViewModel = viewModel<SplashScreenViewModel> {
+                    SplashScreenViewModel(
+                        userDataRepository = UserDataRepositoryImpl(
+                            context = applicationContext
+                        )
+                    )
+                }
+
+                val googleSignInViewModel = viewModel<GoogleSignInViewModel> {
+                    GoogleSignInViewModel(
+                        googleAuthClient = googleAuthClient
                     )
                 }
 
@@ -91,9 +124,31 @@ class MainActivity : ComponentActivity() {
                             .padding(innerPadding),
                         contentAlignment = Alignment.Center
                     ) {
-                        SignInScreen(
-                            viewModel = authViewModel
+                        SignIn(
+                            viewModel = googleSignInViewModel
                         )
+                        /*NavHost(
+                            navController = navController,
+                            startDestination = "splash"
+                        ) {
+                            composable("splash") {
+                                SplashScreen(
+                                    viewModel = splashScreenViewModel,
+                                    navController = navController
+                                )
+                            }
+                            composable("signIn") {
+                                SignInScreen(
+                                    viewModel = authViewModel,
+                                    navController = navController
+                                )
+                            }
+                            composable("profile") {
+                                ProfileScreen(
+                                    viewModel = profileViewModel
+                                )
+                            }
+                        }*/
                     }
                 }
             }

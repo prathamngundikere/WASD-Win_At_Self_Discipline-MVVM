@@ -1,5 +1,6 @@
 package com.prathamngundikere.wasd.ui.viewModel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.prathamngundikere.wasd.data.repository.AuthManager
@@ -17,7 +18,7 @@ class AuthViewModel(
     private val _state = MutableStateFlow<State>(State.Empty)
     val state = _state.asStateFlow()
 
-    fun signInWithEmailAndPassword(email: String, password: String) {
+    fun createAccountWithEmailAndPassword(email: String, password: String) {
         _state.value = State.Loading
         viewModelScope.launch {
             val result = authManager.createAccountWithEmailAndPassword(
@@ -32,6 +33,29 @@ class AuthViewModel(
                     }
                 }
                 is Result.Success -> {
+                    Log.d("AuthViewModel", "createAccountWithEmailAndPassword: ${result.data}")
+                    _state.value = State.Success
+                }
+            }
+        }
+    }
+
+    fun signInWithEmailAndPassword(email: String, password: String) {
+        _state.value = State.Loading
+        viewModelScope.launch {
+            val result = authManager.signInWithEmailAndPassword(
+                email = email,
+                password = password
+            )
+            when(result) {
+                is Result.Error -> {
+                    _state.value = when(result.error) {
+                        AuthError.InvalidEmailAndPassword -> State.Error("Invalid email or password")
+                        AuthError.UnknownError -> State.Error("Unknown error")
+                    }
+                }
+                is Result.Success -> {
+                    Log.d("AuthViewModel", "signInWithEmailAndPassword: ${result.data}")
                     _state.value = State.Success
                 }
             }
