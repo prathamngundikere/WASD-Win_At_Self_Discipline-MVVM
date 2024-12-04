@@ -3,6 +3,7 @@ package com.prathamngundikere.wasd.ui.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.prathamngundikere.wasd.data.model.UserData
+import com.prathamngundikere.wasd.data.repository.GoogleAuthRepository
 import com.prathamngundikere.wasd.data.repository.UserDataRepository
 import com.prathamngundikere.wasd.domain.State
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(
-    private val userDataRepository: UserDataRepository
+    private val googleAuthRepository: GoogleAuthRepository,
 ): ViewModel() {
     private val _userData = MutableStateFlow<UserData?>(null)
     val userData = _userData.asStateFlow()
@@ -19,8 +20,13 @@ class ProfileViewModel(
     fun getUserData() {
         _state.value = State.Loading
         viewModelScope.launch {
-            _userData.value = userDataRepository.getUserData()
+            _userData.value = googleAuthRepository.getUserData()
             _state.value = State.Success
+        }
+    }
+    fun signOut() {
+        viewModelScope.launch {
+            googleAuthRepository.signOut()
         }
     }
 }

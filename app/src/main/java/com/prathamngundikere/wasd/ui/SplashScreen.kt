@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.prathamngundikere.wasd.ui.viewModel.SplashScreenViewModel
 import kotlinx.coroutines.delay
+import androidx.compose.runtime.livedata.observeAsState
 
 @Composable
 fun SplashScreen(
@@ -19,10 +20,10 @@ fun SplashScreen(
     viewModel: SplashScreenViewModel,
     navController: NavController
 ) {
-    val isLoggedIn = viewModel.isLoggedIn.value
-    LaunchedEffect(key1 = true) {
+    Log.d("SplashScreen", "SplashScreen: I am Here")
+    val isLoggedIn = viewModel.isLoggedIn.observeAsState(initial = false).value
+    LaunchedEffect(key1 = isLoggedIn) {
         delay(2000)
-        viewModel.checkLoginStatus()
         Log.d("SplashScreen", "isLoggedIn: $isLoggedIn")
         if (isLoggedIn == true) {
             navController.navigate("profile") {

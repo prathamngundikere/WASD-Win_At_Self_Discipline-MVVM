@@ -26,6 +26,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.prathamngundikere.wasd.data.repository.impl.ConnectivityObserverImpl
 import com.prathamngundikere.wasd.data.repository.impl.FirebaseAuthManager
+import com.prathamngundikere.wasd.data.repository.impl.GoogleAuthRepositoryImpl
 import com.prathamngundikere.wasd.data.repository.impl.UserDataRepositoryImpl
 import com.prathamngundikere.wasd.ui.ProfileScreen
 import com.prathamngundikere.wasd.ui.SignInScreen
@@ -54,27 +55,23 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
+                val googleAuthRepository = GoogleAuthRepositoryImpl(
+                    context = applicationContext
+                )
+
                 val authViewModel = viewModel<AuthViewModel> {
                     AuthViewModel(
-                        authManager = FirebaseAuthManager(
-                            userDataRepository = UserDataRepositoryImpl(
-                                context = applicationContext
-                            )
-                        )
+                        googleAuthRepository = googleAuthRepository
                     )
                 }
                 val profileViewModel = viewModel<ProfileViewModel> {
                     ProfileViewModel(
-                        userDataRepository = UserDataRepositoryImpl(
-                            context = applicationContext
-                        )
+                        googleAuthRepository = googleAuthRepository
                     )
                 }
                 val splashScreenViewModel = viewModel<SplashScreenViewModel> {
                     SplashScreenViewModel(
-                        userDataRepository = UserDataRepositoryImpl(
-                            context = applicationContext
-                        )
+                        googleAuthRepository = googleAuthRepository
                     )
                 }
 
@@ -124,10 +121,7 @@ class MainActivity : ComponentActivity() {
                             .padding(innerPadding),
                         contentAlignment = Alignment.Center
                     ) {
-                        SignIn(
-                            viewModel = googleSignInViewModel
-                        )
-                        /*NavHost(
+                        NavHost(
                             navController = navController,
                             startDestination = "splash"
                         ) {
@@ -145,10 +139,11 @@ class MainActivity : ComponentActivity() {
                             }
                             composable("profile") {
                                 ProfileScreen(
-                                    viewModel = profileViewModel
+                                    viewModel = profileViewModel,
+                                    navController = navController
                                 )
                             }
-                        }*/
+                        }
                     }
                 }
             }

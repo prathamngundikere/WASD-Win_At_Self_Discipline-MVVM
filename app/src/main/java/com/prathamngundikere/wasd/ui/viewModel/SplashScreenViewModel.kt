@@ -6,11 +6,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.prathamngundikere.wasd.data.repository.GoogleAuthRepository
 import com.prathamngundikere.wasd.data.repository.UserDataRepository
 import kotlinx.coroutines.launch
 
 class SplashScreenViewModel(
-    private val userDataRepository: UserDataRepository
+    private val googleAuthRepository: GoogleAuthRepository
 ): ViewModel() {
     private val _isLoggedIn = MutableLiveData<Boolean>()
     val isLoggedIn: LiveData<Boolean> get() = _isLoggedIn
@@ -19,7 +20,7 @@ class SplashScreenViewModel(
     }
      fun checkLoginStatus() {
         viewModelScope.launch {
-            _isLoggedIn.value = FirebaseAuth.getInstance().currentUser != null
+            _isLoggedIn.value = googleAuthRepository.isSignedIn()
             Log.d("SplashScreenViewModel", "checkLoginStatus: ${_isLoggedIn.value}")
         }
     }

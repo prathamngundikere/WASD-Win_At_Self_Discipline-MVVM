@@ -1,5 +1,6 @@
 package com.prathamngundikere.wasd.ui
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,6 +37,7 @@ import androidx.navigation.NavController
 import com.prathamngundikere.wasd.domain.State
 import com.prathamngundikere.wasd.ui.viewModel.AuthViewModel
 import com.prathamngundikere.wasd.R
+import kotlinx.coroutines.delay
 
 @Composable
 fun SignInScreen(
@@ -43,9 +45,19 @@ fun SignInScreen(
     viewModel: AuthViewModel,
     navController: NavController
 ) {
-    val email = remember { mutableStateOf("") }
-    val password = remember { mutableStateOf("") }
+    Log.d("SignInScreen", "SignInScreen: I am Here")
     val uiState = viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(key1 = uiState.value) {
+        delay(5000)
+        if (uiState.value is State.Success) {
+            navController.navigate("profile") {
+                popUpTo("signIn") {
+                    inclusive = true
+                }
+            }
+        }
+    }
 
     Column(
         modifier = modifier
@@ -62,13 +74,7 @@ fun SignInScreen(
                 CircularProgressIndicator()
             }
             State.Success -> {
-                Text(text = "Success")
                 LinearProgressIndicator()
-                navController.navigate("profile") {
-                    popUpTo("signIn") {
-                        inclusive = true
-                    }
-                }
             }
             State.Empty -> {
                 Column(
@@ -79,7 +85,9 @@ fun SignInScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     OutlinedButton(
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            viewModel.signIn()
+                        },
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Image(
