@@ -3,23 +3,24 @@ package com.prathamngundikere.wasd.ui
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,6 +30,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.prathamngundikere.wasd.domain.State
 import com.prathamngundikere.wasd.R
 import kotlinx.coroutines.delay
@@ -42,6 +48,13 @@ fun SignInScreen(
     resetState: () -> Unit
 ) {
     Log.d("SignInScreen", "SignInScreen: I am Here")
+
+    val composition = rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loading))
+    val composition2 = rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.signin))
+    val progress by animateLottieCompositionAsState(
+        composition = composition.value,
+        iterations = LottieConstants.IterateForever
+    )
 
     DisposableEffect(Unit) {
         onDispose {
@@ -62,7 +75,8 @@ fun SignInScreen(
 
     Column(
         modifier = modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -72,24 +86,39 @@ fun SignInScreen(
                 Text(text = error)
             }
             State.Loading -> {
-                CircularProgressIndicator()
+                LottieAnimation(
+                    composition = composition.value,
+                    progress = { progress },
+                    modifier = Modifier.size(100.dp)
+                )
             }
             State.Success -> {
-                LinearProgressIndicator()
+                LottieAnimation(
+                    composition = composition.value,
+                    progress = { progress },
+                    modifier = Modifier.size(100.dp)
+                )
             }
             State.Empty -> {
                 Column(
                     modifier = modifier
-                        .fillMaxSize(),
+                        .fillMaxSize()
+                        .padding(30.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                    verticalArrangement = Arrangement.SpaceEvenly
                 ) {
+                    LottieAnimation(
+                        composition = composition2.value,
+                        progress = { progress },
+                        modifier = Modifier.size(500.dp)
+                    )
                     OutlinedButton(
                         onClick = {
                             Log.d("SignInScreen", "SignInScreen: Clicked")
                             onClick()
                         },
                         modifier = Modifier
+                            .fillMaxWidth()
                             .padding(vertical = 10.dp, horizontal = 20.dp),
                         shape = RoundedCornerShape(2.dp),
                         border = BorderStroke(1.dp, Color.Black),

@@ -1,6 +1,13 @@
 package com.prathamngundikere.wasd.ui
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +25,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,6 +40,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.prathamngundikere.wasd.data.model.UserData
 import com.prathamngundikere.wasd.domain.State
+import kotlinx.coroutines.delay
 
 @Composable
 fun ProfileScreen(
@@ -41,6 +52,7 @@ fun ProfileScreen(
 ) {
     Log.d("ProfileScreen", "ProfileScreen: I am Here")
     Log.d("ProfileScreen", "state: $state  userData: $userData")
+
     when (state) {
         is State.Error -> {
             val error = state.message
@@ -66,30 +78,56 @@ fun ProfileScreen(
                 modifier = modifier
                     .fillMaxSize()
                     .background(
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.background
                     ),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                AsyncImage(
-                    model = userData?.profilePictureUrl,
-                    contentDescription = "Profile Picture",
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                        .border(2.dp, Color.Gray, CircleShape)
-                )
+                // Animation state for the image
+                val imageVisible = remember { mutableStateOf(false) }
+                val textVisible = remember { mutableStateOf(false) }
+
+                // Trigger animations with delay
+                LaunchedEffect(Unit) {
+                    imageVisible.value = true
+                    delay(300) // Delay before showing the text
+                    textVisible.value = true
+                }
+                AnimatedVisibility(
+                    visible = imageVisible.value,
+                    enter = scaleIn() + fadeIn(),
+                    exit = scaleOut() + fadeOut()
+                ) {
+                    AsyncImage(
+                        model = userData?.profilePictureUrl,
+                        contentDescription = "Profile Picture",
+                        modifier = Modifier
+                            .size(150.dp)
+                            .clip(CircleShape)
+                            .border(2.dp, Color.Gray, CircleShape)
+                    )
+                }
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = userData?.username ?: "",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = Color.Black
-                )
-                Text(
-                    text = userData?.email ?: "",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Black
-                )
+                AnimatedVisibility(
+                    visible = textVisible.value,
+                    enter = slideInVertically() + fadeIn(),
+                    exit = slideOutVertically() + fadeOut()
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = userData?.username ?: "",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = userData?.email ?: "",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(32.dp))
                 Button(
                     onClick = {
