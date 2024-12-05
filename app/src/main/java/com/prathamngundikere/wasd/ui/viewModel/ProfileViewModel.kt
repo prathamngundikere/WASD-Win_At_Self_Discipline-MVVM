@@ -20,7 +20,7 @@ class ProfileViewModel(
 
     init {
         viewModelScope.launch {
-            delay(5000)
+            delay(10)
             getUserData()
         }
     }

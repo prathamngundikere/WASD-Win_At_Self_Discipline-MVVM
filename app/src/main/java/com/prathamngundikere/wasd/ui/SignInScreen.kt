@@ -50,7 +50,7 @@ fun SignInScreen(
     }
 
     LaunchedEffect(key1 = state) {
-        delay(5000)
+        delay(10)
         if (state is State.Success) {
             navController.navigate("profile") {
                 popUpTo("signIn") {

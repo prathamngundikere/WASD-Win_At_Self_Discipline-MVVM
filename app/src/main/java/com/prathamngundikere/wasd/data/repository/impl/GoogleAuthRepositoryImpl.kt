@@ -11,6 +11,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.prathamngundikere.wasd.R
 import com.prathamngundikere.wasd.data.model.UserData
 import com.prathamngundikere.wasd.data.repository.GoogleAuthRepository
 import com.prathamngundikere.wasd.domain.AuthError
@@ -82,7 +83,7 @@ class GoogleAuthRepositoryImpl(
                 GetGoogleIdOption.Builder()
                     .setFilterByAuthorizedAccounts(false)
                     .setServerClientId(
-                        "563621539089-o9p86b9i8qgfrge1ejibucvsbhlo6q5f.apps.googleusercontent.com"
+                        context.getString(R.string.googlesdk)
                     )
                     .setAutoSelectEnabled(false)
                     .build()
