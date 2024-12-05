@@ -1,6 +1,7 @@
 package com.prathamngundikere.wasd.ui
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,39 +12,36 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.prathamngundikere.wasd.data.model.UserData
 import com.prathamngundikere.wasd.domain.State
-import com.prathamngundikere.wasd.ui.viewModel.ProfileViewModel
 
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
-    viewModel: ProfileViewModel,
+    state: State,
+    userData: UserData?,
+    signOut: () -> Unit,
     navController: NavController
 ) {
     Log.d("ProfileScreen", "ProfileScreen: I am Here")
-    val userData = viewModel.userData.collectAsStateWithLifecycle().value
-    val state = viewModel.state.collectAsStateWithLifecycle().value
-
-    // Fetch user data when the screen is first launched
-    LaunchedEffect(key1 = true) { // Avoid fetching multiple times
-            viewModel.getUserData()
-    }
-
+    Log.d("ProfileScreen", "state: $state  userData: $userData")
     when (state) {
         is State.Error -> {
             val error = state.message
@@ -68,7 +66,9 @@ fun ProfileScreen(
             Column(
                 modifier = modifier
                     .fillMaxSize()
-                    .padding(16.dp),
+                    .background(
+                        color = Color.White
+                    ),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -83,20 +83,35 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = userData?.username ?: "",
-                    style = MaterialTheme.typography.headlineMedium
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = Color.Black
                 )
                 Text(
                     text = userData?.email ?: "",
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Black
                 )
                 Spacer(modifier = Modifier.height(32.dp))
-                Button(onClick = {
-                    viewModel.signOut()
-                    navController.navigate("signIn") {
+                Button(
+                    onClick = {
+                    signOut()
+                        navController.navigate("signIn") {
                         popUpTo("profile") { inclusive = true }
-                    }
-                }) {
-                    Text("Sign Out")
+                        }
+                    },
+                    shape = RoundedCornerShape(5.dp),
+                    colors = ButtonColors(
+                        containerColor = Color.Red,
+                        contentColor = Color.White,
+                        disabledContainerColor = Color.Gray,
+                        disabledContentColor = Color.Black
+                    )
+                ) {
+                    Text(
+                        text = "Sign Out",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
@@ -111,4 +126,20 @@ fun ProfileScreen(
             }
         }
     }
+}
+
+@Preview
+@Composable
+private fun ProfileScreenPrev() {
+    ProfileScreen(
+        state = State.Success,
+        userData = UserData(
+            username = "Pratham",
+            email = "john.mckinley@examplepetstore.com",
+            profilePictureUrl = "",
+            uid = "1234567890"
+        ),
+        signOut = {},
+        navController = NavController(LocalContext.current)
+    )
 }

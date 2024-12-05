@@ -1,5 +1,5 @@
 package com.prathamngundikere.wasd
-
+/*
 import android.content.Context
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
@@ -95,4 +95,4 @@ class GoogleAuthClient(
         )
         firebaseAuth.signOut()
     }
-}
+}*/

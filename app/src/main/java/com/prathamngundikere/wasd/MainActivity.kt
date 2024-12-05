@@ -11,23 +11,19 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.prathamngundikere.wasd.data.repository.impl.ConnectivityObserverImpl
-import com.prathamngundikere.wasd.data.repository.impl.FirebaseAuthManager
 import com.prathamngundikere.wasd.data.repository.impl.GoogleAuthRepositoryImpl
-import com.prathamngundikere.wasd.data.repository.impl.UserDataRepositoryImpl
 import com.prathamngundikere.wasd.ui.ProfileScreen
 import com.prathamngundikere.wasd.ui.SignInScreen
 import com.prathamngundikere.wasd.ui.SplashScreen
@@ -43,7 +39,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val googleAuthClient = GoogleAuthClient(applicationContext)
         setContent {
             WASDTheme {
                 val navController = rememberNavController()
@@ -72,12 +67,6 @@ class MainActivity : ComponentActivity() {
                 val splashScreenViewModel = viewModel<SplashScreenViewModel> {
                     SplashScreenViewModel(
                         googleAuthRepository = googleAuthRepository
-                    )
-                }
-
-                val googleSignInViewModel = viewModel<GoogleSignInViewModel> {
-                    GoogleSignInViewModel(
-                        googleAuthClient = googleAuthClient
                     )
                 }
 
@@ -127,19 +116,28 @@ class MainActivity : ComponentActivity() {
                         ) {
                             composable("splash") {
                                 SplashScreen(
-                                    viewModel = splashScreenViewModel,
+                                    isLoggedIn = splashScreenViewModel.isLoggedIn.observeAsState(
+                                        initial = true
+                                    ).value,
                                     navController = navController
                                 )
                             }
                             composable("signIn") {
                                 SignInScreen(
-                                    viewModel = authViewModel,
-                                    navController = navController
+                                    state = authViewModel.state.collectAsStateWithLifecycle().value,
+                                    onClick = authViewModel::signIn,
+                                    navController = navController,
+                                    resetState = authViewModel::resetState
                                 )
                             }
                             composable("profile") {
+                                LaunchedEffect(key1 = true) {
+                                    profileViewModel.getUserData()
+                                }
                                 ProfileScreen(
-                                    viewModel = profileViewModel,
+                                    state = profileViewModel.state.collectAsStateWithLifecycle().value,
+                                    userData = profileViewModel.userData.collectAsStateWithLifecycle().value,
+                                    signOut = profileViewModel::signOut,
                                     navController = navController
                                 )
                             }
@@ -148,21 +146,5 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    WASDTheme {
-        Greeting("Android")
     }
 }

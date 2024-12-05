@@ -1,9 +1,7 @@
 package com.prathamngundikere.wasd.ui.viewModel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.prathamngundikere.wasd.data.repository.AuthManager
 import com.prathamngundikere.wasd.data.repository.GoogleAuthRepository
 import com.prathamngundikere.wasd.domain.AuthError
 import com.prathamngundikere.wasd.domain.Result
@@ -18,6 +16,10 @@ class AuthViewModel(
 
     private val _state = MutableStateFlow<State>(State.Empty)
     val state = _state.asStateFlow()
+
+    fun resetState() {
+        _state.value = State.Empty
+    }
 
     fun signIn() {
         _state.value = State.Loading

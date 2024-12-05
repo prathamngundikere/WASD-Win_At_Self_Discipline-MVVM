@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.prathamngundikere.wasd.data.model.UserData
 import com.prathamngundikere.wasd.data.repository.GoogleAuthRepository
-import com.prathamngundikere.wasd.data.repository.UserDataRepository
 import com.prathamngundikere.wasd.domain.State
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -17,6 +17,14 @@ class ProfileViewModel(
     val userData = _userData.asStateFlow()
     private val _state = MutableStateFlow<State>(State.Empty)
     val state = _state.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            delay(5000)
+            getUserData()
+        }
+    }
+
     fun getUserData() {
         _state.value = State.Loading
         viewModelScope.launch {
