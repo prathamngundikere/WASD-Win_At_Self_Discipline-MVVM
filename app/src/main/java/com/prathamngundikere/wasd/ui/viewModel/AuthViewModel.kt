@@ -13,8 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class AuthViewModel(
-    private val googleAuthRepository: GoogleAuthRepository,
-    private val fireStoreRepository: FireStoreRepository
+    private val googleAuthRepository: GoogleAuthRepository
 ): ViewModel() {
 
     private val _state = MutableStateFlow<State>(State.Empty)
@@ -31,17 +30,6 @@ class AuthViewModel(
             _state.value = when(result) {
                 is Result.Success -> {
                     if (result.data) {
-                        val userData = googleAuthRepository.getUserData()
-                        if (userData != null) {
-                            fireStoreRepository.insertUser(
-                                User(
-                                    userId = userData.uid,
-                                    userName = userData.username.toString(),
-                                    email = userData.email,
-                                    lastLogin = System.currentTimeMillis()
-                                )
-                            )
-                        }
                         State.Success
                     } else {
                         _state.value = State.Empty

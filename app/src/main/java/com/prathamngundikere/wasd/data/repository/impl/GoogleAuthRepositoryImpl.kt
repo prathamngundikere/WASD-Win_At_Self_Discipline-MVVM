@@ -12,7 +12,9 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingExcept
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.prathamngundikere.wasd.R
+import com.prathamngundikere.wasd.data.model.User
 import com.prathamngundikere.wasd.data.model.UserData
+import com.prathamngundikere.wasd.data.repository.FireStoreRepository
 import com.prathamngundikere.wasd.data.repository.GoogleAuthRepository
 import com.prathamngundikere.wasd.domain.AuthError
 import com.prathamngundikere.wasd.domain.Result
@@ -22,6 +24,7 @@ import kotlinx.coroutines.withContext
 
 class GoogleAuthRepositoryImpl(
     private val context: Context,
+    private val fireStoreRepository: FireStoreRepository
 ): GoogleAuthRepository {
 
     private val credentialManager = CredentialManager.create(context)
@@ -67,6 +70,34 @@ class GoogleAuthRepositoryImpl(
                     tokenCredential.idToken, null
                 )
                 val authResult = firebaseAuth.signInWithCredential(authCredential).await()
+                val isNewUser = authResult.additionalUserInfo?.isNewUser ?: false
+                if (isNewUser) {
+                    // Handle new user sign-in
+                    val user = authResult.user
+                    if(user != null) {
+                        fireStoreRepository.insertUser(
+                            User(
+                                userId = user.uid,
+                                userName = user.displayName.toString(),
+                                email = user.email.toString(),
+                                lastLogin = System.currentTimeMillis()
+                            )
+                        )
+                    }
+                } else {
+                    // Handle existing user sign-in
+                    val user = authResult.user
+                    if(user != null) {
+                        fireStoreRepository.updateUser(
+                            User(
+                                userId = user.uid,
+                                userName = user.displayName.toString(),
+                                email = user.email.toString(),
+                                lastLogin = System.currentTimeMillis()
+                            )
+                        )
+                    }
+                }
                 return authResult.user != null
             } catch (e: GoogleIdTokenParsingException) {
                 e.printStackTrace()

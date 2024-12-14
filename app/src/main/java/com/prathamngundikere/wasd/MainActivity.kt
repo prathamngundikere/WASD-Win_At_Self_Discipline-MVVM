@@ -56,18 +56,18 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                val googleAuthRepository = GoogleAuthRepositoryImpl(
-                    context = applicationContext
-                )
-
                 val fireStoreRepository = FireStoreRepositoryImpl(
                     context = applicationContext
                 )
 
+                val googleAuthRepository = GoogleAuthRepositoryImpl(
+                    context = applicationContext,
+                    fireStoreRepository = fireStoreRepository
+                )
+
                 val authViewModel = viewModel<AuthViewModel> {
                     AuthViewModel(
-                        googleAuthRepository = googleAuthRepository,
-                        fireStoreRepository = fireStoreRepository
+                        googleAuthRepository = googleAuthRepository
                     )
                 }
                 val profileViewModel = viewModel<ProfileViewModel> {
