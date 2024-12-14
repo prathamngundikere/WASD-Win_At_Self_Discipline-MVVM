@@ -2,8 +2,6 @@ package com.prathamngundikere.wasd.ui.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.prathamngundikere.wasd.data.model.User
-import com.prathamngundikere.wasd.data.repository.FireStoreRepository
 import com.prathamngundikere.wasd.data.repository.GoogleAuthRepository
 import com.prathamngundikere.wasd.domain.AuthError
 import com.prathamngundikere.wasd.domain.Result
