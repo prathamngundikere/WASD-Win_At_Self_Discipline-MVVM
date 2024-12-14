@@ -24,6 +24,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.prathamngundikere.wasd.data.repository.impl.ConnectivityObserverImpl
+import com.prathamngundikere.wasd.data.repository.impl.FireStoreRepositoryImpl
 import com.prathamngundikere.wasd.data.repository.impl.GoogleAuthRepositoryImpl
 import com.prathamngundikere.wasd.ui.ProfileScreen
 import com.prathamngundikere.wasd.ui.SignInScreen
@@ -59,9 +60,14 @@ class MainActivity : ComponentActivity() {
                     context = applicationContext
                 )
 
+                val fireStoreRepository = FireStoreRepositoryImpl(
+                    context = applicationContext
+                )
+
                 val authViewModel = viewModel<AuthViewModel> {
                     AuthViewModel(
-                        googleAuthRepository = googleAuthRepository
+                        googleAuthRepository = googleAuthRepository,
+                        fireStoreRepository = fireStoreRepository
                     )
                 }
                 val profileViewModel = viewModel<ProfileViewModel> {

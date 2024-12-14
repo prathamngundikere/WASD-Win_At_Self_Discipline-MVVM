@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">WASD</string>
     <string name="googlesdk">563621539089-o9p86b9i8qgfrge1ejibucvsbhlo6q5f.apps.googleusercontent.com</string>
+    <string name="daily">daily</string>
+    <string name="users">users</string>
+    <string name="habits">habits</string>
+    <string name="tasks">tasks</string>
+    <string name="rewards">rewards</string>
 </resources>
