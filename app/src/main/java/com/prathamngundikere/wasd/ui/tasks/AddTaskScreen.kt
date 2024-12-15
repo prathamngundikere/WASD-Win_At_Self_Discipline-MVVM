@@ -203,7 +203,8 @@ fun AddTaskScreen(
                         priority = priority,
                         dueDate = selectedDate.value?.atStartOfDay(ZoneId.systemDefault())?.toInstant()?.toEpochMilli() ?: 0L,
                         points = points.toInt(),
-                        createdAt = System.currentTimeMillis()
+                        createdAt = System.currentTimeMillis(),
+                        isCompleted = false
                     )
                     onAddTaskClick(newTask)
                     navController.navigate("task") {
@@ -224,7 +225,8 @@ fun AddTaskScreen(
                     priority = priority,
                     dueDate = selectedDate.value?.atStartOfDay(ZoneId.systemDefault())?.toInstant()?.toEpochMilli() ?: 0L,
                     points = points.toInt(),
-                    createdAt = System.currentTimeMillis()
+                    createdAt = System.currentTimeMillis(),
+                    isCompleted = false
                 )
                 onAddTaskClick(newTask)
                 navController.navigate("task") {

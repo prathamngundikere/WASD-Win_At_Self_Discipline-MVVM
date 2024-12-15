@@ -1,50 +1,38 @@
-package com.prathamngundikere.wasd.ui.tasks
+package com.prathamngundikere.wasd.ui.habit
 
 import android.util.Log
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.animation.core.copy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.prathamngundikere.wasd.data.model.Task
 import com.prathamngundikere.wasd.domain.State
-import java.time.Instant
-import java.time.ZoneId
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.prathamngundikere.wasd.data.model.Habit
 
 @Composable
-fun TaskScreen(
-    tasks: List<Task>,
+fun HabitScreen(
+    habits: List<Habit>,
     navController: NavController,
     state: State,
-    taskCompleted: (Task) -> Unit = {}
+    habitCompleted: (Habit) -> Unit = {}
 ) {
-    when(state) {
+    when (state) {
         State.Empty -> {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -78,7 +66,9 @@ fun TaskScreen(
                 floatingActionButton = {
                     FloatingActionButton(
                         onClick = {
-                            navController.navigate("add_task")
+                            // Navigate to add habit screen
+                            navController.navigate("add_habit")
+                        // Assuming you have a route for adding habits
                         }
                     ) {
                         Text(text = "+")
@@ -91,64 +81,48 @@ fun TaskScreen(
                         .padding(it)
                 ) {
                     items(
-                        items = tasks,
-                        key = {task -> task.taskId}
-                    ) {task ->
-                        Log.d("TaskScreen", "Task: $task")
+                        items = habits,
+                        key = { habit -> habit.habitId }
+                    ) { habit ->
+                        Log.d("HabitScreen", "Habit: $habit")
                         ListItem(
                             headlineContent = {
-                                Text(text = task.title)
+                                Text(text = habit.name)
                             },
                             supportingContent = {
-                                Text(text = task.description)
+                                Text(text = habit.description)
                             },
                             overlineContent = {
-                                Text(
-                                    text = task.priority,
-                                    color = when (task.priority) {
-                                        "low" -> Color.Green
-                                        "medium" -> Color.Yellow // Or any color you prefer for medium priority
-                                        "high" -> Color.Red
-                                        else -> Color.Unspecified // Default color if priority is unknown
-                                    }
-                                )
+                                Text(text = habit.type) // Display habit type (daily, weekly, etc.)
                             },
                             trailingContent = {
                                 Column {
                                     Checkbox(
-                                        checked = task.isCompleted,
+                                        checked = habit.completedCount > 0, // Assuming completedCount > 0 means completed for the day/week/month
                                         onCheckedChange = { checked ->
-                                            tasks.map{
-                                                if (it.taskId == task.taskId) {
-                                                    it.copy(isCompleted = checked)
-                                                    taskCompleted(it)
+                                            habits.map {
+                                                if (it.habitId == habit.habitId) {
+                                                    // Assuming completedCount > 0 means completed for the day/week/month
+                                                    val updatedCompletedCount =
+                                                        if (checked) habit.completedCount + 1 else 0
+                                                    it.copy(completedCount = updatedCompletedCount)
+                                                    habitCompleted(it) // Call habitCompleted in ViewModel
                                                 } else {
                                                     it
                                                 }
                                             }
                                         }
                                     )
-                                    Text(text = Instant.ofEpochMilli(task.dueDate).atZone(ZoneId.systemDefault()).toLocalDate().toString())
+                                    // You might want to display last completed date or other relevant information here
                                 }
                             },
                             leadingContent = {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Star, // Or any game-related icon
-                                        contentDescription = "Points",
-                                        tint = Color.Yellow // Or any game-inspired color
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp)) // Add some spacing
-                                    Text(
-                                        text = "+${task.points}",
-                                        fontWeight = FontWeight.Bold, // Or any contrasting color
-                                        style = MaterialTheme.typography.headlineMedium
-                                    )
-                                }
+                                Text(
+                                    text = "\uD83D\uDD25 ${habit.streak}",
+                                    fontSize = 28.sp
+                                )
                             },
+                            // You can customize leading content for habits if needed
                             modifier = Modifier
                                 .fillMaxWidth()
                         )

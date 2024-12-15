@@ -13,13 +13,12 @@ import kotlinx.coroutines.launch
 import com.prathamngundikere.wasd.domain.Result
 import com.prathamngundikere.wasd.domain.State
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.StateFlow
 
 class TaskViewModel(
     private val fireStoreRepository: FireStoreRepository,
     private val googleAuthRepository: GoogleAuthRepository
 ): ViewModel() {
-    private val _tasks = MutableStateFlow<List<Task>>(emptyList())
-    val tasks = _tasks.asStateFlow()
 
     private val _state = MutableStateFlow<State>(State.Empty)
     val state = _state.asStateFlow()
@@ -27,23 +26,29 @@ class TaskViewModel(
     private val _userData = MutableStateFlow<UserData?>(null)
     init {
         viewModelScope.launch{
-            delay(10)
             getTasks()
         }
     }
-     fun getTasks() {
+    private val _tasks = MutableStateFlow<List<Task>>(emptyList())
+    val tasks: StateFlow<List<Task>> = _tasks
+
+    fun getTasks() {
         viewModelScope.launch {
             _state.value = State.Loading
-            _userData.value = googleAuthRepository.getUserData()
-            delay(10)
-            val result = fireStoreRepository.getTasks(
-                _userData.value?.uid ?: ""
-            )
+            val userId = googleAuthRepository.getUserData()?.uid ?: ""
+            if (userId.isEmpty()) {
+                Log.e("TaskViewModel", "User ID is empty")
+                _state.value = State.Error("User ID is empty")
+                return@launch
+            }
+
+            val result = fireStoreRepository.getTasks(userId)
             if (result is Result.Success) {
-                _tasks.value = result.data
+                Log.d("TaskViewModel", "Fetched tasks: ${result.data}")
+                _tasks.value = result.data // Emit new task list
                 _state.value = State.Success
             } else if (result is Result.Error) {
-                Log.e("TaskViewModel", "Error fetching tasks")
+                Log.e("TaskViewModel", "Error fetching tasks: ${result.error}")
                 _state.value = State.Error("Error fetching tasks")
             }
         }
@@ -52,7 +57,6 @@ class TaskViewModel(
         viewModelScope.launch {
             _state.value = State.Loading
             _userData.value = googleAuthRepository.getUserData()
-            delay(10)
             Log.d("TaskViewModel", "Adding task: $task to user: ${_userData.value?.uid ?: ""}")
             val result = fireStoreRepository.insertTask(
                 userId = _userData.value?.uid ?: "",
@@ -64,6 +68,24 @@ class TaskViewModel(
             } else if (result is Result.Error) {
                 Log.e("TaskViewModel", "Error adding task")
                 _state.value = State.Success
+            }
+        }
+    }
+    fun taskCompleted(task: Task) {
+        viewModelScope.launch {
+            _state.value = State.Loading
+            _userData.value = googleAuthRepository.getUserData()
+            val result = fireStoreRepository.updateTask(
+                userId = _userData.value?.uid ?: "",
+                task = task.copy(isCompleted = !task.isCompleted) // Update isCompleted here
+            )
+            if (result is Result.Success) {
+                getTasks() // Refresh tasks list
+                _state.value = State.Success
+            } else if (result is Result.Error) {
+                Log.e("TaskViewModel", "Error updating task: ${result.error.toString()}")
+                _state.value = State.Error("Update failed")
+                // Consider displaying an error message to the user
             }
         }
     }

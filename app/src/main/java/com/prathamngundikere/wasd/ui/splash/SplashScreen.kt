@@ -21,7 +21,7 @@ fun SplashScreen(
         delay(10)
         Log.d("SplashScreen", "isLoggedIn: $isLoggedIn")
         if (isLoggedIn == true) {
-            navController.navigate("task") {
+            navController.navigate("main") {
                 popUpTo("splash") {
                     inclusive = true
                 }

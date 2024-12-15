@@ -2,6 +2,7 @@ package com.prathamngundikere.wasd.data.repository.impl
 
 import android.content.Context
 import android.util.Log
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.prathamngundikere.wasd.R
@@ -151,28 +152,28 @@ class FireStoreRepositoryImpl(
     ): Result<Boolean, FireStoreError> {
         return try {
             withContext(Dispatchers.IO) {
-                var result: Boolean = false
-                usersCollection
+                if (userId.isEmpty() || habit.habitId.isEmpty()) {
+                    Log.e("FireStoreRepository", "updateHabit: User ID or Task ID is empty")
+                    return@withContext Result.Error(FireStoreError.UNABLE_TO_UPDATE_HABIT)
+                }
+
+                val habitDocument = usersCollection
                     .document(userId)
                     .collection("habits")
                     .document(habit.habitId)
-                    .set(habit.toHashMap(), SetOptions.merge())
-                    .addOnSuccessListener{
-                        result = true
-                    }
-                    .addOnFailureListener {
-                        result = false
-                        Log.e("FireStoreRepository", "updateHabit: Failed message: ${it.message}")
-                    }
-                if (result) {
+
+                try {
+                    Tasks.await(habitDocument.set(habit.toHashMap(), SetOptions.merge()))
+                    Log.d("FireStoreRepository", "updateHabit: Success")
                     Result.Success(true)
-                } else {
-                    Result.Error(FireStoreError.UNABLE_TO_UPDATE_HABIT)
+                } catch (e: Exception) {
+                    Log.e("FireStoreRepository", "updateHabit: Failed message: ${e.message}")
+                    Result.Error(FireStoreError.UNABLE_TO_UPDATE_TASK)
                 }
             }
         } catch (e: Exception) {
-            Log.e("FireStoreRepository", "updateHabit: Failed message: ${e.message}")
-            Result.Error(FireStoreError.UNABLE_TO_UPDATE_HABIT)
+            Log.e("FireStoreRepository", "updateTask: Exception occurred: ${e.message}")
+            Result.Error(FireStoreError.UNABLE_TO_UPDATE_TASK)
         }
     }
 
@@ -274,27 +275,27 @@ class FireStoreRepositoryImpl(
     ): Result<Boolean, FireStoreError> {
         return try {
             withContext(Dispatchers.IO) {
-                var result: Boolean = false
-                usersCollection
+                if (userId.isEmpty() || task.taskId.isEmpty()) {
+                    Log.e("FireStoreRepository", "updateTask: User ID or Task ID is empty")
+                    return@withContext Result.Error(FireStoreError.UNABLE_TO_UPDATE_TASK)
+                }
+
+                val taskDocument = usersCollection
                     .document(userId)
                     .collection("tasks")
                     .document(task.taskId)
-                    .set(task.toHashMap(), SetOptions.merge())
-                    .addOnSuccessListener{
-                        result = true
-                    }
-                    .addOnFailureListener {
-                        result = false
-                        Log.e("FireStoreRepository", "updateTask: Failed message: ${it.message}")
-                    }
-                if (result) {
+
+                try {
+                    Tasks.await(taskDocument.set(task.toHashMap(), SetOptions.merge()))
+                    Log.d("FireStoreRepository", "updateTask: Success")
                     Result.Success(true)
-                } else {
+                } catch (e: Exception) {
+                    Log.e("FireStoreRepository", "updateTask: Failed message: ${e.message}")
                     Result.Error(FireStoreError.UNABLE_TO_UPDATE_TASK)
                 }
             }
         } catch (e: Exception) {
-            Log.e("FireStoreRepository", "updateTask: Failed message: ${e.message}")
+            Log.e("FireStoreRepository", "updateTask: Exception occurred: ${e.message}")
             Result.Error(FireStoreError.UNABLE_TO_UPDATE_TASK)
         }
     }
@@ -348,7 +349,8 @@ class FireStoreRepositoryImpl(
                     .collection("tasks")
                 val query = ref.get().await()
                 val tasks = query.documents.mapNotNull {
-                    it.toObject(Task::class.java)
+                    Log.d("FireStoreRepository", "RawGetTasks: $it")
+                    it.toObject(Task::class.java)?.copy(taskId = it.id)
                 }
                 Result.Success(tasks)
             }
@@ -558,6 +560,7 @@ class FireStoreRepositoryImpl(
     }
 
     private fun Map<String, Any>.toTask(): Task {
+        Log.d("FireStoreRepository", "toTask: $this")
         return Task(
             taskId = this["taskId"] as String,
             title = this["title"] as String,

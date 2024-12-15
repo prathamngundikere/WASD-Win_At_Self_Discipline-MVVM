@@ -1,5 +1,7 @@
 package com.prathamngundikere.wasd.ui.profile
 
+import android.app.Activity
+import android.content.Context
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -32,11 +34,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.prathamngundikere.wasd.data.model.UserData
 import com.prathamngundikere.wasd.domain.State
@@ -48,7 +47,7 @@ fun ProfileScreen(
     state: State,
     userData: UserData?,
     signOut: () -> Unit,
-    navController: NavController
+    context: Context
 ) {
     Log.d("ProfileScreen", "ProfileScreen: I am Here")
     Log.d("ProfileScreen", "state: $state  userData: $userData")
@@ -131,10 +130,15 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(32.dp))
                 Button(
                     onClick = {
-                    signOut()
-                        navController.navigate("signIn") {
-                        popUpTo("profile") { inclusive = true }
-                        }
+                        signOut()
+                        val context = context
+                        val activity = (context as? Activity)
+
+                        // Clear shared preferences, databases, etc.
+                        // ...
+
+                        // Finish all activities and clear back stack
+                        activity?.finishAffinity()
                     },
                     shape = RoundedCornerShape(5.dp),
                     colors = ButtonColors(
@@ -163,20 +167,4 @@ fun ProfileScreen(
             }
         }
     }
-}
-
-@Preview
-@Composable
-private fun ProfileScreenPrev() {
-    ProfileScreen(
-        state = State.Success,
-        userData = UserData(
-            username = "Pratham",
-            email = "john.mckinley@examplepetstore.com",
-            profilePictureUrl = "",
-            uid = "1234567890"
-        ),
-        signOut = {},
-        navController = NavController(LocalContext.current)
-    )
 }
