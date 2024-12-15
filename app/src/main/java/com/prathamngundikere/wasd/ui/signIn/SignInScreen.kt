@@ -1,4 +1,4 @@
-package com.prathamngundikere.wasd.ui
+package com.prathamngundikere.wasd.ui.signIn
 
 import android.util.Log
 import androidx.compose.foundation.BorderStroke

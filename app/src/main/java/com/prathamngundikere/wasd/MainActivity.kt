@@ -26,16 +26,16 @@ import androidx.navigation.compose.rememberNavController
 import com.prathamngundikere.wasd.data.repository.impl.ConnectivityObserverImpl
 import com.prathamngundikere.wasd.data.repository.impl.FireStoreRepositoryImpl
 import com.prathamngundikere.wasd.data.repository.impl.GoogleAuthRepositoryImpl
-import com.prathamngundikere.wasd.ui.ProfileScreen
-import com.prathamngundikere.wasd.ui.SignInScreen
-import com.prathamngundikere.wasd.ui.SplashScreen
+import com.prathamngundikere.wasd.ui.profile.ProfileScreen
+import com.prathamngundikere.wasd.ui.signIn.SignInScreen
+import com.prathamngundikere.wasd.ui.splash.SplashScreen
 import com.prathamngundikere.wasd.ui.tasks.AddTaskScreen
 import com.prathamngundikere.wasd.ui.tasks.TaskScreen
 import com.prathamngundikere.wasd.ui.theme.WASDTheme
-import com.prathamngundikere.wasd.ui.viewModel.AuthViewModel
+import com.prathamngundikere.wasd.ui.signIn.AuthViewModel
 import com.prathamngundikere.wasd.ui.viewModel.ConnectivityViewModel
-import com.prathamngundikere.wasd.ui.viewModel.ProfileViewModel
-import com.prathamngundikere.wasd.ui.viewModel.SplashScreenViewModel
+import com.prathamngundikere.wasd.ui.profile.ProfileViewModel
+import com.prathamngundikere.wasd.ui.splash.SplashScreenViewModel
 import com.prathamngundikere.wasd.ui.tasks.TaskViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -163,9 +163,13 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                             composable("task") {
+                                LaunchedEffect(key1 = true) {
+                                    taskViewMode.getTasks()
+                                }
                                 TaskScreen(
                                     tasks = taskViewMode.tasks.collectAsStateWithLifecycle().value,
-                                    navController = navController
+                                    navController = navController,
+                                    state = taskViewMode.state.collectAsStateWithLifecycle().value
                                 )
                             }
                             composable("add_task") {

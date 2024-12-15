@@ -1,4 +1,4 @@
-package com.prathamngundikere.wasd.ui.viewModel
+package com.prathamngundikere.wasd.ui.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

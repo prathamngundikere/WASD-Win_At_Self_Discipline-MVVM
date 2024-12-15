@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import com.prathamngundikere.wasd.domain.Result
+import com.prathamngundikere.wasd.domain.State
+import kotlinx.coroutines.delay
 
 class TaskViewModel(
     private val fireStoreRepository: FireStoreRepository,
@@ -19,26 +21,38 @@ class TaskViewModel(
     private val _tasks = MutableStateFlow<List<Task>>(emptyList())
     val tasks = _tasks.asStateFlow()
 
+    private val _state = MutableStateFlow<State>(State.Empty)
+    val state = _state.asStateFlow()
+
     private val _userData = MutableStateFlow<UserData?>(null)
     init {
-        getTasks()
+        viewModelScope.launch{
+            delay(10)
+            getTasks()
+        }
     }
-    private fun getTasks() {
+     fun getTasks() {
         viewModelScope.launch {
+            _state.value = State.Loading
             _userData.value = googleAuthRepository.getUserData()
+            delay(10)
             val result = fireStoreRepository.getTasks(
                 _userData.value?.uid ?: ""
             )
             if (result is Result.Success) {
                 _tasks.value = result.data
+                _state.value = State.Success
             } else if (result is Result.Error) {
                 Log.e("TaskViewModel", "Error fetching tasks")
+                _state.value = State.Error("Error fetching tasks")
             }
         }
     }
     fun addTask(task: Task) {
         viewModelScope.launch {
+            _state.value = State.Loading
             _userData.value = googleAuthRepository.getUserData()
+            delay(10)
             Log.d("TaskViewModel", "Adding task: $task to user: ${_userData.value?.uid ?: ""}")
             val result = fireStoreRepository.insertTask(
                 userId = _userData.value?.uid ?: "",
@@ -46,8 +60,10 @@ class TaskViewModel(
             )
             if (result is Result.Success) {
                 getTasks()
+                _state.value = State.Success
             } else if (result is Result.Error) {
                 Log.e("TaskViewModel", "Error adding task")
+                _state.value = State.Success
             }
         }
     }

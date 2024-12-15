@@ -1,4 +1,4 @@
-package com.prathamngundikere.wasd.ui
+package com.prathamngundikere.wasd.ui.splash
 
 import android.util.Log
 import androidx.compose.foundation.background

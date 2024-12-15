@@ -1,4 +1,4 @@
-package com.prathamngundikere.wasd.ui
+package com.prathamngundikere.wasd.ui.profile
 
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility

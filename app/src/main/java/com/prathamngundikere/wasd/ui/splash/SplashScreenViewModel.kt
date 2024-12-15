@@ -1,4 +1,4 @@
-package com.prathamngundikere.wasd.ui.viewModel
+package com.prathamngundikere.wasd.ui.splash
 
 import android.util.Log
 import androidx.lifecycle.LiveData

@@ -64,6 +64,8 @@ dependencies {
     implementation(libs.googleid)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.lottie.compose)
+    implementation(libs.core)
+    implementation(libs.calendar)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
