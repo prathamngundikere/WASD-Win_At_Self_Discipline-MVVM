@@ -65,7 +65,7 @@ fun SignInScreen(
     LaunchedEffect(key1 = state) {
         delay(10)
         if (state is State.Success) {
-            navController.navigate("profile") {
+            navController.navigate("task") {
                 popUpTo("signIn") {
                     inclusive = true
                 }

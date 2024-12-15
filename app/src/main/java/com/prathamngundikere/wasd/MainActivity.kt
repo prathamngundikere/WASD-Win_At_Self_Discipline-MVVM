@@ -29,11 +29,14 @@ import com.prathamngundikere.wasd.data.repository.impl.GoogleAuthRepositoryImpl
 import com.prathamngundikere.wasd.ui.ProfileScreen
 import com.prathamngundikere.wasd.ui.SignInScreen
 import com.prathamngundikere.wasd.ui.SplashScreen
+import com.prathamngundikere.wasd.ui.tasks.AddTaskScreen
+import com.prathamngundikere.wasd.ui.tasks.TaskScreen
 import com.prathamngundikere.wasd.ui.theme.WASDTheme
 import com.prathamngundikere.wasd.ui.viewModel.AuthViewModel
 import com.prathamngundikere.wasd.ui.viewModel.ConnectivityViewModel
 import com.prathamngundikere.wasd.ui.viewModel.ProfileViewModel
 import com.prathamngundikere.wasd.ui.viewModel.SplashScreenViewModel
+import com.prathamngundikere.wasd.ui.tasks.TaskViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -77,6 +80,13 @@ class MainActivity : ComponentActivity() {
                 }
                 val splashScreenViewModel = viewModel<SplashScreenViewModel> {
                     SplashScreenViewModel(
+                        googleAuthRepository = googleAuthRepository
+                    )
+                }
+
+                val taskViewMode = viewModel<TaskViewModel> {
+                    TaskViewModel(
+                        fireStoreRepository = fireStoreRepository,
                         googleAuthRepository = googleAuthRepository
                     )
                 }
@@ -128,7 +138,7 @@ class MainActivity : ComponentActivity() {
                             composable("splash") {
                                 SplashScreen(
                                     isLoggedIn = splashScreenViewModel.isLoggedIn.observeAsState(
-                                        initial = true
+                                        initial = false
                                     ).value,
                                     navController = navController
                                 )
@@ -149,6 +159,20 @@ class MainActivity : ComponentActivity() {
                                     state = profileViewModel.state.collectAsStateWithLifecycle().value,
                                     userData = profileViewModel.userData.collectAsStateWithLifecycle().value,
                                     signOut = profileViewModel::signOut,
+                                    navController = navController
+                                )
+                            }
+                            composable("task") {
+                                TaskScreen(
+                                    tasks = taskViewMode.tasks.collectAsStateWithLifecycle().value,
+                                    navController = navController
+                                )
+                            }
+                            composable("add_task") {
+                                AddTaskScreen(
+                                    onAddTaskClick = {
+                                        taskViewMode.addTask(it)
+                                    },
                                     navController = navController
                                 )
                             }
