@@ -8,14 +8,31 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -23,6 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.prathamngundikere.wasd.data.model.BottomNavigationItem
 import com.prathamngundikere.wasd.data.repository.impl.ConnectivityObserverImpl
 import com.prathamngundikere.wasd.data.repository.impl.FireStoreRepositoryImpl
 import com.prathamngundikere.wasd.data.repository.impl.GoogleAuthRepositoryImpl
@@ -50,6 +68,34 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             WASDTheme {
+
+                val navItems = listOf(
+                    BottomNavigationItem(
+                        title = "Task",
+                        selectedIcon = Icons.Filled.CheckCircle,
+                        unSelectedIcon = Icons.Outlined.CheckCircle
+                    ),
+                    BottomNavigationItem(
+                        title = "Habits",
+                        selectedIcon = Icons.Filled.Check,
+                        unSelectedIcon = Icons.Outlined.Check
+                    ),
+                    BottomNavigationItem(
+                        title = "Rewards",
+                        selectedIcon = Icons.Filled.Star,
+                        unSelectedIcon = Icons.Outlined.Star
+                    ),
+                    BottomNavigationItem(
+                        title = "Profile",
+                        selectedIcon = Icons.Filled.AccountCircle,
+                        unSelectedIcon = Icons.Outlined.AccountCircle
+                    )
+                )
+
+                var selectedItemIndex by rememberSaveable {
+                    mutableIntStateOf(0)
+                }
+
                 val navController = rememberNavController()
                 val viewModel = viewModel<ConnectivityViewModel> {
                     ConnectivityViewModel(
@@ -123,6 +169,35 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     snackbarHost = {
                         SnackbarHost(hostState = snackBarHostState)
+                    },
+                    bottomBar = {
+                        NavigationBar {
+                            navItems.forEachIndexed { index, item ->
+                                NavigationBarItem(
+                                    selected = selectedItemIndex == index,
+                                    onClick = {
+                                        selectedItemIndex = index
+                                        navController.navigate(item.route) {
+                                            popUpTo(navController.graph.startDestinationId)
+                                            launchSingleTop = true
+                                        }
+                                    },
+                                    icon = {
+                                        Icon(
+                                            imageVector = if (index == selectedItemIndex) {
+                                                item.selectedIcon
+                                            } else {
+                                                item.unSelectedIcon
+                                            },
+                                            contentDescription = item.title
+                                        )
+                                    },
+                                    label = {
+                                        Text(text = item.title)
+                                    }
+                                )
+                            }
+                        }
                     }
                 ) { innerPadding ->
                     Box(
@@ -179,6 +254,12 @@ class MainActivity : ComponentActivity() {
                                     },
                                     navController = navController
                                 )
+                            }
+                            composable("rewards") {
+
+                            }
+                            composable("habits") {
+
                             }
                         }
                     }
